@@ -24,20 +24,23 @@ public class DadosManager : MonoBehaviour
     private List<Dado> dados = new List<Dado>();
     private Dado[] dadosEscogidos;
     private int[] numDadosEscogidos;
+    private DadoBus dadoBus;
 
     public Image[] images;
     public TMP_Text[] text;
-    public TMP_Text puntajeText;
+    public TMP_Text puntajeText, textoCamion;
     public Button tirarBoton;
+    public GameObject usandoCamion;
 
     public int cerebrosParaGanar = 7;
     public int disparosParaPerder = 3;
     int cerebros, disparos;
-    bool atrapoNovio;
+    bool atrapoNovio, schoolBus;
 
     // Start is called before the first frame update
     void Start()
     {
+        dadoBus = new DadoBus();
         StartNewRound();
     }
 
@@ -128,10 +131,79 @@ public class DadosManager : MonoBehaviour
         }
     }
 
+    void TirarDadoBus(int[] tiros)
+    {
+        int tiro = Random.Range(0, dadoBus.caras.Length);
+        textoCamion.text = dadoBus.caras[tiro].ToString();
+
+        if (dadoBus.caras[tiro] == CaraDado.Cara.Cerebro)
+            cerebros++;
+
+        else if (dadoBus.caras[tiro] == CaraDado.Cara.Cerebrox2)
+            cerebros += 2;
+
+        else if (dadoBus.caras[tiro] == CaraDado.Cara.Cerebrox3)
+            cerebros += 3;
+
+        else if (dadoBus.caras[tiro] == CaraDado.Cara.Cerebrox2_1Disparo)
+        {
+            cerebros += 2;
+            disparos++;
+        }
+
+        else if (dadoBus.caras[tiro] == CaraDado.Cara.Disparo)
+            disparos++;
+
+        else if (dadoBus.caras[tiro] == CaraDado.Cara.Disparox2)
+            disparos += 2;
+
+        else if (dadoBus.caras[tiro] == CaraDado.Cara.Cerebro_Disparo)
+        {
+            cerebros++;
+            disparos++;
+        }
+
+        else if (dadoBus.caras[tiro] == CaraDado.Cara.Stop)
+        {
+            textoCamion.text = "Disparos a patas";
+            for (int i = 0; i < tiros.Length; i++)
+            {
+                if (dadosEscogidos[i].caras[i] == CaraDado.Cara.Disparo)
+                {
+                    disparos--;
+                    dadosEscogidos[i].caras[i] = CaraDado.Cara.Patas;
+                }
+            }
+        }
+
+        else if (dadoBus.caras[tiro] == CaraDado.Cara.Deadend)
+        {
+            textoCamion.text = "Termina tu turno";
+            StartCoroutine(Reiniciar());
+        }
+
+        else if (dadoBus.caras[tiro] == CaraDado.Cara.Atropellado)
+            cerebros -= 2;
+
+        else if (dadoBus.caras[tiro] == CaraDado.Cara.Yield)
+        {
+            textoCamion.text = "Patas a cerebros";
+            for (int i = 0; i < tiros.Length; i++)
+            {
+                Debug.Log(dadosEscogidos[i].caras[i]);
+                if (dadosEscogidos[i].caras[i] == CaraDado.Cara.Patas)
+                {
+                    cerebros++;
+                    dadosEscogidos[i].caras[i] = CaraDado.Cara.Cerebro;
+                }
+            }
+        }
+    }
+
     public void TirarDados()
     {
         tirarBoton.interactable = false;
-        int[] tiros = new int[3];
+        int[] tiros = new int[3];  
 
         for (int i = 0; i < dadosEscogidos.Length; i++)
         {
@@ -236,7 +308,11 @@ public class DadosManager : MonoBehaviour
             {
                 disparos++;
             }// Subir numero de disparos
-        }
+        }// Manejar dados
+
+        textoCamion.text = "No usaste el camion";
+        if (schoolBus)
+            TirarDadoBus(tiros);
 
         for(int k = 0; k < dadosEscogidos.Length; k++)
         {
@@ -260,7 +336,8 @@ public class DadosManager : MonoBehaviour
                 dados.Remove(dadosEscogidos[k]);
                 dadosEscogidos[k] = null;
             }
-        }
+        }// Limpiar info de dados
+
 
         puntajeText.text = cerebros.ToString() + " cerebros, " + disparos.ToString() + " disparos";
 
@@ -291,6 +368,12 @@ public class DadosManager : MonoBehaviour
         numDadosEscogidos = new int[3];
         FillDice();
         EscogerDados();
+    }
+
+    public void UsarCamion()
+    {
+        schoolBus = !schoolBus;
+        usandoCamion.SetActive(schoolBus);
     }
 
     IEnumerator NuevosDados()
