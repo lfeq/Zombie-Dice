@@ -778,11 +778,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fe612a6a370ae148ac3c6d6e5b50141, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxDadosVerdes: 6
+  maxDadosVerdes: 4
   maxDadosAmarillos: 4
   maxDadosRojos: 3
-  maxDadosChica: 1
-  numDadosEscogidos: 
+  maxDadosNovia: 1
+  maxDadosNovio: 1
+  maxDadosSanta: 1
   images:
   - {fileID: 1554513985}
   - {fileID: 1018106347}
